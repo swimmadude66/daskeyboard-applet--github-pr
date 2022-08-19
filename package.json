@@ -1,0 +1,47 @@
+{
+  "name": "daskeyboard-applet--github-pr",
+  "displayName": "Github PR Status",
+  "version": "0.0.1",
+  "description": "An indicator of the status of recent PRs",
+  "longDescription": "Watch up to a total of 5 repositories and show a color to indicate progress, errors, or success",
+  "officialProductName": "Github PRs",
+  "isSingleton": true,
+  "videoUrl": "",
+  "icon": "assets/icon.png",
+  "image": "assets/image-missing.png",
+  "authorName": "swimmadude66",
+  "authorUrl": "https://github.com/swimmadude66",
+  "issuesUrl": "https://github.com/swimmadude66/daskeyboard-applet--github-pr/issues",
+  "homePageUrl": "https://github.com/swimmadude66/daskeyboard-applet--github-pr",
+  "publisher": "Das Keyboard",
+  "changelogUrl": "CHANGELOG.md",
+  "readMeUrl": "README.md",
+  "readMeEndUserUrl": "README_END_USER.md",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "mocha",
+    "build": "tsc"
+  },
+  "engines": {
+    "das-keyboard-q": "3.0.0"
+  },
+  "author": "Das Keyboard",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "0.27.2",
+    "daskeyboard-applet": "2.11.5"
+  },
+  "qConfig": {
+    "geometry": {
+      "width": 5,
+      "height": 1
+    },
+    "authorization": {
+      "type": "apiKey",
+      "hint": "Github personal access token"
+    }
+  },
+  "devDependencies": {
+    "mocha": "8.3.2"
+  }
+}
