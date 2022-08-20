@@ -4,44 +4,51 @@
   "version": "0.0.1",
   "description": "An indicator of the status of recent PRs",
   "longDescription": "Watch up to a total of 5 repositories and show a color to indicate progress, errors, or success",
-  "officialProductName": "Github PRs",
+  "officialProductName": "Pull Requests",
   "isSingleton": true,
   "videoUrl": "",
   "icon": "assets/icon.png",
-  "image": "assets/image-missing.png",
+  "image": "assets/icon.png",
+  "publisher": "Das Keyboard",
   "authorName": "swimmadude66",
   "authorUrl": "https://github.com/swimmadude66",
   "issuesUrl": "https://github.com/swimmadude66/daskeyboard-applet--github-pr/issues",
   "homePageUrl": "https://github.com/swimmadude66/daskeyboard-applet--github-pr",
-  "publisher": "Das Keyboard",
+  "developerRepoUrl": "https://github.com/swimmadude66/daskeyboard-applet--github-pr",
+  "licenseUrl": "http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt",
   "changelogUrl": "CHANGELOG.md",
+  "license": "MIT",
   "readMeUrl": "README.md",
-  "readMeEndUserUrl": "README_END_USER.md",
-  "main": "dist/index.js",
+  "readMeEndUserUrl": "README_ENDUSER.md",
+  "main": "index.js",
   "scripts": {
-    "test": "mocha",
-    "build": "tsc"
+    "start": "node index.js",
+    "test": "mocha"
   },
   "engines": {
     "das-keyboard-q": "3.0.0"
   },
-  "author": "Das Keyboard",
-  "license": "MIT",
   "dependencies": {
     "axios": "0.27.2",
-    "daskeyboard-applet": "2.11.5"
+    "daskeyboard-applet": "2.11.5",
+    "mocha": "8.3.2"
   },
   "qConfig": {
     "geometry": {
       "width": 5,
-      "height": 1
+      "height": 1,
+      "defaults": {
+        "origin": {
+          "x": 9,
+          "y": 2
+        }
+      }
     },
     "authorization": {
-      "type": "apiKey",
-      "hint": "Github personal access token"
+      "type": "apiKey"
+    },
+    "applet": {
+      "defaults": {}
     }
-  },
-  "devDependencies": {
-    "mocha": "8.3.2"
   }
 }
