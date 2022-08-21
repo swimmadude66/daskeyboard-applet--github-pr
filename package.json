@@ -1,11 +1,11 @@
 {
   "name": "daskeyboard-applet--github-pr",
   "displayName": "Github PR Status",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "An indicator of the status of recent PRs",
   "longDescription": "Watch up to a total of 5 repositories and show a color to indicate progress, errors, or success",
   "officialProductName": "Pull Requests",
-  "isSingleton": true,
+  "isSingleton": false,
   "videoUrl": "",
   "icon": "assets/icon.png",
   "image": "assets/icon.png",
@@ -36,7 +36,7 @@
   },
   "qConfig": {
     "geometry": {
-      "width": 5,
+      "width": 1,
       "height": 1,
       "defaults": {
         "origin": {
@@ -48,6 +48,16 @@
     "authorization": {
       "type": "apiKey"
     },
+    "questions": [
+      {
+        "key": "PRIndex",
+        "label": "PR Index",
+        "help": "This key will display the status of the PR at this index. 1 = most recent, 2 = second most recent, etc.",
+        "order": 1,
+        "value": "1",
+        "controlType": "textbox"
+      }
+    ],
     "applet": {
       "defaults": {}
     }

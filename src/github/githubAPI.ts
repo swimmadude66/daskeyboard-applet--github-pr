@@ -17,7 +17,11 @@ export class GithubAPI {
     }
 
     async getMyOpenPRs(): Promise<APIResponse<PullRequestSearchResult>> {
-        return await this._axios.get('https://api.github.com/search/issues?q=author:@me+is:open+is:pr').then((response) => response.data)
+        return await this._axios.get(`https://api.github.com/search/issues?q=author:@me+is:open+is:pr&sort=created`).then((response) => response.data)
+    }
+
+    async getOpenPRByIndex(index: number = 1): Promise<APIResponse<PullRequestSearchResult>> {
+        return await this._axios.get(`https://api.github.com/search/issues?q=author:@me+is:open+is:pr&sort=created&per_page=1&page=${index}`).then((response) => response.data)
     }
 
     async getPR(repo: string, prID: string): Promise<PullRequestResponse> {
@@ -102,6 +106,25 @@ export class GithubAPI {
                 error: e && e.toString()
             }
         } 
+    }
+
+    async getPRStatusByIndex(index: number): Promise<StatusResponse | undefined> {
+        if (index < 1) {
+            throw Error('Start your index at 1')
+        }
+        const PRSearchResult = await this.getOpenPRByIndex(index)
+        if (!PRSearchResult || PRSearchResult.total_count < 1) {
+            return undefined
+        }
+        const pullRequestURL = PRSearchResult.items?.[0]?.pull_request?.url
+        if (!pullRequestURL || !pullRequestURL.length) {
+            return undefined
+        }
+        const PR = await this.getPRByURL(pullRequestURL)
+        if (!PR || !PR.title || !PR.html_url) {
+            return undefined
+        }
+        return this.getPRStatus(PR)
     }
 
     async getMyPRStatuses(limit: number): Promise<StatusResponse[]> {
