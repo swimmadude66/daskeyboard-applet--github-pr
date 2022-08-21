@@ -1,8 +1,6 @@
 import { GithubAPI } from './github/githubAPI'
 import { PRStatus } from './github/types'
 
-// import {DesktopApp, Actions, Effects, Point, Signal, logger} from 'ts-daskeyboard-applet'
-// import * as q from 'daskeyboard-applet'
 import * as q from 'ts-daskeyboard-applet'
 
 const logger = q.logger
