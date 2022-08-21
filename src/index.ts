@@ -72,23 +72,40 @@ export class GitHubPRStatus extends q.DesktopApp {
     }
     return this._github.getMyPRStatuses(5)
     .then((prStatuses) => {
-      logger.info(`Tracking PRs: ${JSON.stringify(prStatuses, null, 2)}`)
-      const qpoints = new Array(5).fill(new q.Point('#FFFFFF', q.Effects.SET_COLOR))
-      prStatuses.forEach((prStatus, i) => {
-          const info = this.getColorEffectByStatus(prStatus.status)
-          qpoints[i] = new q.Point(info.color, info.effect)
+      logger.info(`Tracking PRs: ${JSON.stringify(prStatuses, null, 2)}`);
+      const qpoints = new Array(5).fill(new q.Point('#FFFFFF', q.Effects.SET_COLOR));
+      const signals = prStatuses.map((prStatus, i) => {
+          const info = this.getColorEffectByStatus(prStatus.status);
+          return new q.Signal({
+              points: [[new q.Point(info.color, info.effect)]],
+              name: prStatus.title,
+              message: prStatus.status,
+              link: {
+                  url: prStatus.link,
+                  label: 'See on GitHub',
+              },
+              origin: {
+                  x: this.getOriginX() + i,
+                  y: this.getOriginY()
+              },
+              isMuted: true,
+          })
       })
-      return new q.Signal({
-          points: [qpoints],
-          name: 'GitHub PRs',
-          message: `Tracking ${prStatuses.length} PRs`,
-          link: {
-              url: 'https://github.com/pulls',
-              label: 'See on GitHub',
-          },
-          isMuted: true,
-      })
-    }).catch((error) => {
+      if (signals.length < 5) {
+          signals.push(new q.Signal({
+              points: [qpoints.slice(signals.length)],
+              name: 'No PR',
+              message: 'No tracked PR',
+              origin: {
+                  x: this.getOriginX() + signals.length,
+                  y: this.getOriginY()
+              },
+              isMuted: true,
+          }))
+      }
+      return signals as any
+    })
+    .catch((error) => {
       logger.error(`Got error sending request to service: ${error}`)
       return new q.Signal({
           points: [new Array(5).fill(new q.Point('#FF0000', q.Effects.BLINK))],
