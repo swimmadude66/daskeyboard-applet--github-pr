@@ -1,17 +1,20 @@
 import { GithubAPI } from './github/githubAPI'
 import { PRStatus } from './github/types'
 
-import * as q from 'daskeyboard-applet'
+// import {DesktopApp, Actions, Effects, Point, Signal, logger} from 'ts-daskeyboard-applet'
+// import * as q from 'daskeyboard-applet'
+import * as q from 'ts-daskeyboard-applet'
 
-const logger = q.logger;
+const logger = q.logger
 
 export class GitHubPRStatus extends q.DesktopApp {
 
   private _github: GithubAPI
+  pollingInterval: number = 30000
 
   constructor() {
-    super();
-    (this as any).pollingInterval = 30000;
+    super()
+    this.pollingInterval = 30000
   }
 
   getColorEffectByStatus(status: PRStatus) {
@@ -32,7 +35,7 @@ export class GitHubPRStatus extends q.DesktopApp {
         return {
           color: '#FFFF00',
           effect: q.Effects.SET_COLOR
-        };
+        }
       }
       case PRStatus.PENDING: {
         return {
@@ -55,17 +58,25 @@ export class GitHubPRStatus extends q.DesktopApp {
     }
   }
 
-  async run() {
-    logger.info("GitHub PR Status running.");
-    if (!this._github) {
+  async applyConfig() {
+    if (!this._github && (this as any).authorization?.apiKey) {
       this._github = new GithubAPI((this as any).authorization.apiKey)
     }
-    return this._github.getMyPRStatuses(5).then(prStatuses => {
-      logger.info(`Tracking PRs: ${JSON.stringify(prStatuses, null, 2)}`);
-      const qpoints = new Array(5).fill(new q.Point('#FFFFFF', q.Effects.SET_COLOR));
+    return true
+  }
+
+  async run() {
+    logger.info("GitHub PR Status running.")
+    if (!this._github) {
+      return null
+    }
+    return this._github.getMyPRStatuses(5)
+    .then((prStatuses) => {
+      logger.info(`Tracking PRs: ${JSON.stringify(prStatuses, null, 2)}`)
+      const qpoints = new Array(5).fill(new q.Point('#FFFFFF', q.Effects.SET_COLOR))
       prStatuses.forEach((prStatus, i) => {
-          const  info = this.getColorEffectByStatus(prStatus.status);
-          qpoints[i] = new q.Point(info.color, info.effect);
+          const info = this.getColorEffectByStatus(prStatus.status)
+          qpoints[i] = new q.Point(info.color, info.effect)
       })
       return new q.Signal({
           points: [qpoints],
@@ -76,17 +87,15 @@ export class GitHubPRStatus extends q.DesktopApp {
               label: 'See on GitHub',
           },
           isMuted: true,
-      });
+      })
     }).catch((error) => {
-      logger.error(`Got error sending request to service: ${error}`);
+      logger.error(`Got error sending request to service: ${error}`)
       return new q.Signal({
-          points: [new Array(5).fill(new q.Point({ color: '#FF0000', effect: q.Effects.BLINK }))],
-          name: 'Github PRs',
-          message: 'Error getting PRs',
-          action: 'ERROR',
+          points: [new Array(5).fill(new q.Point('#FF0000', q.Effects.BLINK))],
+          action: q.Actions.ERROR,
           errors: [error && error.message]
-      });
-    });
+      })
+    })
   }
 }
 
