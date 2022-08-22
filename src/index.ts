@@ -9,6 +9,7 @@ export class GitHubPRStatus extends q.DesktopApp {
 
   private _github: GithubAPI
   pollingInterval: number = 30000
+  prIndex: number = 1
 
   constructor() {
     super()
@@ -60,6 +61,9 @@ export class GitHubPRStatus extends q.DesktopApp {
     if (!this._github && (this as any).authorization?.apiKey) {
       this._github = new GithubAPI((this as any).authorization.apiKey)
     }
+    if (this.config && 'PRIndex' in this.config) {
+      this.prIndex = +((this.config as any).PRIndex)
+    }
     return true
   }
 
@@ -68,28 +72,40 @@ export class GitHubPRStatus extends q.DesktopApp {
     if (!this._github) {
       return null
     }
-    return this._github.getMyPRStatuses(5)
-    .then((prStatuses) => {
-      logger.info(`Tracking PRs: ${JSON.stringify(prStatuses, null, 2)}`)
-      const qpoints = new Array(5).fill(new q.Point('#FFFFFF', q.Effects.SET_COLOR))
-      prStatuses.forEach((prStatus, i) => {
-          const info = this.getColorEffectByStatus(prStatus.status)
-          qpoints[i] = new q.Point(info.color, info.effect)
-      })
+    if (isNaN(this.prIndex) || this.prIndex < 1) {
       return new q.Signal({
-          points: [qpoints],
-          name: 'GitHub PRs',
-          message: `Tracking ${prStatuses.length} PRs`,
+        points: [[new q.Point('#FF0000', q.Effects.BLINK)]],
+        action: q.Actions.ERROR,
+        errors: ['Invalid PR Index']
+    })
+    }
+    return this._github.getPRStatusByIndex(this.prIndex)
+    .then((prStatus) => {
+      const defaultPoint = new q.Point('#FFFFFF', q.Effects.SET_COLOR)
+      if (prStatus && prStatus.status) {
+        const info = this.getColorEffectByStatus(prStatus.status)
+        return new q.Signal({
+          points: [[new q.Point(info.color, info.effect)]],
+          name: prStatus.message,
+          message: prStatus.title,
           link: {
-              url: 'https://github.com/pulls',
+              url: prStatus.link,
               label: 'See on GitHub',
           },
           isMuted: true,
+        })
+      }
+      return new q.Signal({
+        points: [[defaultPoint]],
+        name: 'No PR tracked',
+        message: 'No PR tracked',
+        isMuted: true,
       })
+
     }).catch((error) => {
       logger.error(`Got error sending request to service: ${error}`)
       return new q.Signal({
-          points: [new Array(5).fill(new q.Point('#FF0000', q.Effects.BLINK))],
+          points: [[new q.Point('#FF0000', q.Effects.BLINK)]],
           action: q.Actions.ERROR,
           errors: [error && error.message]
       })
