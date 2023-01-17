@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
-import { APIResponse, PullRequestSearchResult, PullRequestResponse, PullRequestReview, CheckRunsResponse, StatusResponse, PRStatus } from './types'
+import { APIResponse, PullRequestSearchResult, PullRequestResponse, PullRequestReview, CheckRunsResponse, StatusResponse, PRStatus, CheckRun } from './types'
 
 export class GithubAPI {
 
@@ -57,8 +57,8 @@ export class GithubAPI {
             const repo = pr.head.repo.full_name
             // Check checks first for fixable issues
             const checksRes = await this.getChecks(repo, pr.head.ref)
-            const checks = checksRes.check_runs
-            if (checks.some((c) => ['failure', 'cancelled', 'timed_out', 'action_required'].indexOf(c.conclusion) >= 0)) {
+            const checkRuns = this.dedupeCheckRuns(checksRes.check_runs)
+            if (checkRuns.some((c) => ['failure', 'cancelled', 'timed_out', 'action_required'].indexOf(c.conclusion) >= 0)) {
                 return {
                     ...baseInfo,
                     message: 'Some checks have failed',
@@ -66,7 +66,7 @@ export class GithubAPI {
                     error: 'Checks have failed'
                 }
             }
-            if (checks.some((c) => c.status === 'in_progress')) {
+            if (checkRuns.some((c) => c.status === 'in_progress')) {
                 return {
                     ...baseInfo,
                     message: 'Checks are in progress',
@@ -106,6 +106,23 @@ export class GithubAPI {
                 error: e && e.toString()
             }
         } 
+    }
+
+    private dedupeCheckRuns(checkRuns: CheckRun[] = []): CheckRun[] {
+        const attemptsByName = checkRuns.reduce((latestByName, run) => {
+            if (latestByName[run.name] == null) {
+                latestByName = run
+            } else {
+                const currDate = new Date(run.started_at)
+                const newDate = new Date(run.started_at)
+                if (newDate > currDate) {
+                    latestByName[run.name] = run
+                }
+            }
+            return latestByName
+        }, {})
+        return Object.values(attemptsByName)
+
     }
 
     async getPRStatusByIndex(index: number): Promise<StatusResponse | undefined> {

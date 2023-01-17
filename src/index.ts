@@ -70,7 +70,14 @@ export class GitHubPRStatus extends q.DesktopApp {
   async run() {
     logger.info("GitHub PR Status running.")
     if (!this._github) {
-      return null
+      if ((this as any).authorization?.apiKey) {
+        this._github = new GithubAPI((this as any).authorization.apiKey)
+      } else {
+        return null
+      }
+    }
+    if (this.config && 'PRIndex' in this.config) {
+      this.prIndex = +((this.config as any).PRIndex)
     }
     if (isNaN(this.prIndex) || this.prIndex < 1) {
       return new q.Signal({

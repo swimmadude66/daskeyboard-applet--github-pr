@@ -27,6 +27,7 @@ export interface PullRequestResponse {
     html_url: string
     head: {
         ref: string
+        sha: string
         repo: {
             id: number
             node_id: string
@@ -55,6 +56,7 @@ export interface CheckRun {
     }
     status: 'queued' | 'in_progress' | 'completed' 
     conclusion?: 'success' | 'skipped' | 'failure' | 'neutral' | 'cancelled' | 'timed_out' | 'action_required'
+    started_at: string // DateTime
 }
 
 export interface CheckRunsResponse {
