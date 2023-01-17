@@ -56,7 +56,7 @@ export class GithubAPI {
             }
             const repo = pr.head.repo.full_name
             // Check checks first for fixable issues
-            const checksRes = await this.getChecks(repo, pr.head.ref)
+            const checksRes = await this.getChecks(repo, pr.head.sha)
             const checkRuns = this.dedupeCheckRuns(checksRes.check_runs)
             if (checkRuns.some((c) => ['failure', 'cancelled', 'timed_out', 'action_required'].indexOf(c.conclusion) >= 0)) {
                 return {
